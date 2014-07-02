@@ -1,11 +1,11 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xsl:stylesheet version="1.0" 
                 xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
                 xmlns:msxsl="urn:schemas-microsoft-com:xslt" 
                 xmlns:sfr="urn:TechTalk:SpecFlow.Report"
                 xmlns:nunit="urn:NUnit"
-                xmlns:mstest="http://microsoft.com/schemas/VisualStudio/TeamTest/2006"
+                xmlns:mstest="http://microsoft.com/schemas/VisualStudio/TeamTest/2010"
                 exclude-result-prefixes="msxsl nunit sfr">
   <xsl:output method="xml" />
 
@@ -43,18 +43,35 @@
       <xsl:apply-templates select="mstest:ResultSummary" />
 
       <xsl:for-each select="mstest:TestDefinitions/mstest:UnitTest">
+      <!-- mstest.exe:         MyCompany.MyProject.Specs.MyFeature, MyCompany.MyProject.Specs, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+           vstest.console.exe: MyCompany.MyProject.Specs.MyFeature -->
         <xsl:variable name="className" select="mstest:TestMethod/@className" />
         <xsl:if test="not(preceding-sibling::mstest:UnitTest[mstest:TestMethod/@className=$className])">
           <xsl:variable name="unitTests" select="//mstest:UnitTest[mstest:TestMethod/@className=$className]"/>
           
+          <xsl:variable name="namespace" >
+            <xsl:choose>
+              <xsl:when test="contains(mstest:TestMethod/@className, ',')">
+                <xsl:value-of select="substring-before(mstest:TestMethod/@className, ',')" />
+              </xsl:when>
+              <xsl:otherwise>
+                <xsl:value-of select="mstest:TestMethod/@className" />
+              </xsl:otherwise>
+            </xsl:choose>
+          </xsl:variable>
+          
           <nunit:test-suite type="TestFixture" result="Failure" success="False">
             <xsl:attribute name="name">
               <xsl:call-template name="get-last-part">
-                <xsl:with-param name="text" select="substring-before(mstest:TestMethod/@className, ',')" />
+                <!-- <xsl:with-param name="text" select="$namespace" /> -->
+                <xsl:with-param name="text" >
+				 <xsl:value-of select = "$namespace" />
+				</xsl:with-param>
                 <xsl:with-param name="delimiter" select="'.'" />
               </xsl:call-template>
               <!--<xsl:value-of select="substring-before(mstest:TestMethod/@className, ',')"/>-->
             </xsl:attribute>
+			
             <!-- SpecFlow specific conversion -->
             <xsl:if test="mstest:Properties/mstest:Property[string(mstest:Key)='FeatureTitle']">
               <xsl:attribute name="description">
@@ -185,6 +202,19 @@
                     </reason>
                   </test-case>
     -->
+    
+    <!-- mstest.exe:         MyCompany.MyProject.Specs.MyFeature, MyCompany.MyProject.Specs, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+         vstest.console.exe: MyCompany.MyProject.Specs.MyFeature -->
+    <xsl:variable name="namespace" >
+      <xsl:choose>
+        <xsl:when test="contains(mstest:TestMethod/@className, ',')">
+          <xsl:value-of select="substring-before(mstest:TestMethod/@className, ',')" />
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:value-of select="mstest:TestMethod/@className" />
+        </xsl:otherwise>
+      </xsl:choose>
+    </xsl:variable>
 
     <nunit:test-case>
       <xsl:variable name="id" select="@id" />
@@ -192,7 +222,7 @@
       <xsl:variable name="testResult" select="key('unit-test-result', $id)" />
       
       <xsl:attribute name="name">
-        <xsl:value-of select="substring-before(mstest:TestMethod/@className, ',')"/>.<xsl:value-of select="@name"></xsl:value-of>
+        <xsl:value-of select="$namespace"/>.<xsl:value-of select="@name"></xsl:value-of>
       </xsl:attribute>
 
       <xsl:attribute name="description">
