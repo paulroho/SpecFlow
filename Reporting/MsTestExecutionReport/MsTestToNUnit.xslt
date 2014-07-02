@@ -64,9 +64,7 @@
             <xsl:attribute name="name">
               <xsl:call-template name="get-last-part">
                 <!-- <xsl:with-param name="text" select="$namespace" /> -->
-                <xsl:with-param name="text" >
-				 <xsl:value-of select = "$namespace" />
-				</xsl:with-param>
+                <xsl:with-param name="text" select = "$namespace" />
                 <xsl:with-param name="delimiter" select="'.'" />
               </xsl:call-template>
               <!--<xsl:value-of select="substring-before(mstest:TestMethod/@className, ',')"/>-->
