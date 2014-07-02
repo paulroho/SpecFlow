@@ -5,7 +5,7 @@
                 xmlns:msxsl="urn:schemas-microsoft-com:xslt" 
                 xmlns:sfr="urn:TechTalk:SpecFlow.Report"
                 xmlns:nunit="urn:NUnit"
-                xmlns:mstest="http://microsoft.com/schemas/VisualStudio/TeamTest/2010"
+                xmlns:mstest="http://microsoft.com/schemas/VisualStudio/TeamTest/2006"
                 exclude-result-prefixes="msxsl nunit sfr">
   <xsl:output method="xml" />
 
@@ -63,13 +63,11 @@
           <nunit:test-suite type="TestFixture" result="Failure" success="False">
             <xsl:attribute name="name">
               <xsl:call-template name="get-last-part">
-                <!-- <xsl:with-param name="text" select="$namespace" /> -->
-                <xsl:with-param name="text" select = "$namespace" />
+                <xsl:with-param name="text" select="$namespace" />
                 <xsl:with-param name="delimiter" select="'.'" />
               </xsl:call-template>
               <!--<xsl:value-of select="substring-before(mstest:TestMethod/@className, ',')"/>-->
-            </xsl:attribute>
-			
+            </xsl:attribute>			
             <!-- SpecFlow specific conversion -->
             <xsl:if test="mstest:Properties/mstest:Property[string(mstest:Key)='FeatureTitle']">
               <xsl:attribute name="description">
